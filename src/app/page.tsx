@@ -1,37 +1,37 @@
-"use client"
-import { useState } from "react"
-import { removeBackground } from "@imgly/background-removal"
-import { motion } from "framer-motion"
+"use client";
+import { useState } from "react";
+import { removeBackground } from "@imgly/background-removal";
 
 export default function Home() {
-  const [img, setImg] = useState<string | null>(null)
-  const [result, setResult] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [orig, setOrig] = useState<string | null>(null);
+  const [result, setResult] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleFile = async (file: File) => {
-    setImg(URL.createObjectURL(file))
-    setLoading(true)
+  async function handleFile(e: any) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setOrig(URL.createObjectURL(file));
+    setLoading(true);
+    setResult(null);
     try {
-      const blob = await removeBackground(file)
-      setResult(URL.createObjectURL(blob))
-    } catch(e){ console.error(e); alert("Error") }
-    setLoading(false)
+      const blob = await removeBackground(file);
+      setResult(URL.createObjectURL(blob));
+    } catch (err) {
+      alert("Error: " + err);
+    }
+    setLoading(false);
   }
-
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white p-6">
-      <header className="flex justify-between max-w-7xl mx-auto py-4"><h1 className="text-xl font-bold">herramix.app</h1><span className="text-sm bg-purple-500/20 px-3 py-1 rounded-full">Beta</span></header>
-      <motion.div initial={{opacity:0,y:20}} animate={{opacity:1,y:0}} className="max-w-5xl mx-auto mt-20 text-center">
-        <h2 className="text-5xl font-bold">Remove Backgrounds <span className="text-purple-400">in Seconds</span></h2>
-        <p className="mt-4 text-gray-400">IA 100% privada, gratis, sin marca de agua</p>
-        <div className="mt-10 border-2 border-dashed border-purple-500/30 rounded-2xl p-10 bg-white/5">
-          <input type="file" id="f" hidden onChange={e=> e.target.files && handleFile(e.target.files[0])} accept="image/*" />
-          <label htmlFor="f" className="cursor-pointer"><div className="text-6xl mb-4">↑</div><p className="text-xl font-bold">Arrastra tu imagen aquí</p><p className="text-sm text-gray-400">PNG, JPG hasta 10MB</p></label>
-          {loading && <p className="mt-6 text-purple-400 animate-pulse">Procesando con IA...</p>}
-          {img && result && (<div className="grid grid-cols-2 gap-4 mt-8"><div><p className="text-sm mb-2">Original</p><img src={img} className="rounded-xl" /></div><div><p className="text-sm mb-2">Sin fondo</p><img src={result} className="rounded-xl bg-[url('https://i.imgur.com/8Km9tLL.png')]" /></div></div>)}
-          {result && <a href={result} download="herramix-sin-fondo.png" className="mt-6 inline-block bg-purple-600 px-8 py-3 rounded-full font-bold">Descargar PNG</a>}
-        </div>
-      </motion.div>
-    </div>
-  )
+    <main className="min-h-screen bg-black text-white flex flex-col items-center p-6 gap-6">
+      <h1 className="text-3xl font-bold mt-10">Herramix - Quita Fondo</h1>
+      <input type="file" accept="image/*" onChange={handleFile} className="bg-white text-black p-3 rounded" />
+      {loading && <p>Quitando fondo... tarda 10s primera vez</p>}
+      <div className="grid grid-cols-2 gap-4 w-full max-w-4xl">
+        {orig && <div><p>Original</p><img src={orig} className="rounded" /></div>}
+        {result && <div><p>Sin fondo</p><img src={result} className="rounded bg-white" />
+        <a href={result} download="sin-fondo.png" className="block mt-3 bg-green-500 text-center p-3 rounded font-bold">DESCARGAR PNG</a>
+        </div>}
+      </div>
+    </main>
+  );
 }
